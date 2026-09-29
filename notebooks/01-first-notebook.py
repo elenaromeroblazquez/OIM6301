@@ -374,6 +374,12 @@ def _(freight_charges):
 
 @app.cell
 def _(freight_charges):
+    max (freight_charges)
+    return
+
+
+@app.cell
+def _(freight_charges):
     freight_charges[-1] == max(freight_charges)
     return
 

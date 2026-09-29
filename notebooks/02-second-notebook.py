@@ -81,7 +81,6 @@ def _():
     x = 5/2
     print (x)
     type(x)
-
     return
 
 
@@ -92,7 +91,6 @@ def _():
     total_cost = cost + tax
     print (total_cost)
     print (f'The total cost is ${cost}. Total is ${total_cost}.')
-
     return cost, tax
 
 
@@ -100,14 +98,12 @@ def _():
 def _(cost, tax):
     total_cost = float(cost) + float (tax)
     print (total_cost)
-
     return
 
 
 @app.cell
 def _(cost):
     cost*10
-
     return
 
 
@@ -306,14 +302,12 @@ def _(mo):
 
 @app.cell
 def _():
-    score = 81
+    score = 95
 
     if score >= 90:
          print("A")
     elif score >= 60:
         print("pass")
-    elif score >=80: 
-        print ('B')
     else: 
         print ('fail')
     return
@@ -322,7 +316,7 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Q:
+    Q: The first condition that is true decides what gets printed.
     """)
     return
 
@@ -351,6 +345,43 @@ def _(mo):
 def _():
     statuses = ["shipped", "pending", "shipped", "cancelled", "shipped"]
     statuses
+    return (statuses,)
+
+
+@app.cell
+def _(statuses):
+    #count of shipped orders 
+
+    shipped = 0 
+
+    for status in statuses: 
+        if status == "shipped": 
+            shipped = shipped + 1 
+
+    print (shipped)
+    return (shipped,)
+
+
+@app.cell
+def _(statuses):
+    #count of not shipped orders 
+
+    not_shipped = 0 
+
+    for status in statuses: 
+        if status == "shipped": 
+            not_shipped = not_shipped + 1 
+
+    print (not_shipped)
+    return
+
+
+@app.cell
+def _(shipped, statuses):
+    #percentage shipped
+
+    percentage_shipped = shipped / len(statuses) * 100
+    print(percentage_shipped)
     return
 
 
@@ -380,6 +411,27 @@ def _():
     order_lines = ["notebook", "pen"]
     order_lines.append(["stapler", "tape"])
     len(order_lines)
+    return (order_lines,)
+
+
+@app.cell
+def _(order_lines):
+    order_lines[2]
+    return
+
+
+@app.cell
+def _(order_lines):
+    order_lines.extend(["stapler", "tape"])
+    len(order_lines)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    . append() always adds one item to the list.
+    """)
     return
 
 
@@ -410,6 +462,20 @@ def _():
     print(sorted(tickers))
     print(tickers.sort())
     tickers
+    return (tickers,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    tickers.sort() prints None because it changes the original list instead of returning a new list.
+    """)
+    return
+
+
+@app.cell
+def _(tickers):
+    print(sorted(tickers, reverse=True))
     return
 
 
@@ -442,10 +508,40 @@ def _(mo):
 
 @app.cell
 def _():
+    #prices = [12.50, 8.00, 19.99]
+    #sale_prices = prices
+    #sale_prices.append(4.99)
+    #prices
+    return
+
+
+@app.cell
+def _(prices, sale_prices):
+    print(prices is sale_prices)
+    return
+
+
+@app.cell
+def _():
     prices = [12.50, 8.00, 19.99]
-    sale_prices = prices
+    sale_prices = prices [:]
     sale_prices.append(4.99)
     prices
+    return prices, sale_prices
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I would use two names for the same list when I want changes made through one name to also appear in the other.
+    """)
+    return
+
+
+@app.cell
+def _(sale_prices):
+    for i in range(len(sale_prices)):
+        sale_prices[i] = sale_prices[i] * 0.9
     return
 
 
