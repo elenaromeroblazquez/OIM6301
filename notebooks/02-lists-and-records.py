@@ -191,13 +191,13 @@ def _(mo):
     it, write under the letter, and press `Ctrl+Enter`. Code still goes in cells of your
     own, added with the **+** button.
 
-    **A ·**
+    **A The first condition that is true decides what gets printed.·**
 
-    **C ·**
+    **C append() adds the whole object as one item, while extend() adds each item separately.·**
 
-    **D ·**
+    **D because sorted(tickers) creates and returns a new sorted list, while tickers.sort() changes the original list and returns nothing.·**
 
-    **E ·**
+    **E You would want two names to refer to the same list when both should always reflect the same changes ·**
     """)
     return
 
