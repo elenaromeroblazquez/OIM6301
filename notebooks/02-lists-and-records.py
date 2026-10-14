@@ -654,6 +654,12 @@ def _():
     return (orders,)
 
 
+@app.cell
+def _(orders):
+    orders [0]
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
