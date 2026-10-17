@@ -1,8 +1,11 @@
 #wrap the code in a function 
 
-def classify_bmi(weight, height):
-    """calssify BMi into categories."""
+def compute_bmi(weight, height):
     bmi = weight / (height ** 2)
+    return bmi
+
+
+def classify_bmi(bmi):
     if bmi >= 30:
         category = "Obese"
     elif bmi >= 25:
@@ -11,16 +14,22 @@ def classify_bmi(weight, height):
         category = "Normal"
     else:
         category = "Underweight"
-    #print(category)
+
     return category
+
 
 def main():
     weight = float(input("Enter your weight in kg: "))
     height = float(input("Enter your height in meters: "))
+
     bmi_value = compute_bmi(weight, height)
     result = classify_bmi(bmi_value)
-    print(f"Your BMI is {bmi_value:.2f}, and your category {result}.")
 
-main()
+    print(f"Your BMI is {bmi_value:.2f}, and your category is {result}.")
+
+
+if __name__ == "__main__":
+    main()
+
 
 
