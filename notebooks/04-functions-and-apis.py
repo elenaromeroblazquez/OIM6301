@@ -186,12 +186,75 @@ def _(mo):
     return
 
 
+@app.cell
+def _(holdings, retirement_holdings):
+    def count_shares(portfolio):
+        total_shares = 0
+        for symbol, shares, price in portfolio:
+            total_shares += shares
+        return total_shares
+
+    print(count_shares(holdings))
+    print(count_shares(retirement_holdings))
+
+    return
+
+
+@app.function
+def find_largest(portfolio):
+    largest_symbol = ""
+    largest_cost = 0
+
+    for symbol, shares, price in portfolio:
+        cost = shares * price
+
+        if cost > largest_cost:
+            largest_cost = cost
+            largest_symbol = symbol
+
+    return (largest_symbol, largest_cost)
+
+
+@app.cell
+def _(holdings, retirement_holdings):
+    print(find_largest(holdings))
+    print(find_largest(retirement_holdings))
+
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     ## ✏️ B · Without `return`
 
     Copy `count_shares` into a new cell under a new name, and put `print(...)` where the `return` was. Call it and keep the result in a name. In a markdown cell under it, answer: what does that name hold, and what could the next cell do with it?
+    """)
+    return
+
+
+@app.function
+def print_shares(portfolio):
+    total_shares = 0
+
+    for symbol, shares, price in portfolio:
+        total_shares += shares
+
+    print(total_shares)
+
+
+@app.cell
+def _(holdings):
+    result = print_shares(holdings)
+    print(result)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The variable holds None because the function prints the result but does not return it. The next cell cannot use it for calculations because it is not a number.
     """)
     return
 
