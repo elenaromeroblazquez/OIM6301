@@ -159,9 +159,9 @@ def _(mo):
 
     **B · France, Germany, Brazil, and the USA had the most orders, with 4 each.**
 
-    **C ·**
+    **C · 1- List, because we can add, remove, and reorder items. 2- Set, because each customer should appear only once. 3- Dictionary, because we can use the product name as a key to find the units sold. 4- Tuple, because the shipment info should not change.**
 
-    **D ·**
+    **D · I prefer a list of dictionaries because each value has a name, making the code easier to read and understand.**
 
     **G ·**
     """)
@@ -523,6 +523,39 @@ def _():
         ("TSLA", 150, 255.70),
     ]
     holdings
+    return (holdings,)
+
+
+@app.cell
+def _(holdings):
+    total_cost = 0
+
+    for _symbol, _shares, _price in holdings:
+        total_cost = total_cost + _shares * _price
+
+    print(total_cost)
+
+    return
+
+
+@app.cell
+def _(holdings):
+    costs = {}
+
+    for _symbol, _shares, _price in holdings:
+        costs[_symbol] = _shares * _price
+
+    costs
+
+    return (costs,)
+
+
+@app.cell
+def _(costs):
+    largest = max(costs, key=costs.get)
+
+    print(largest, costs[largest])
+
     return
 
 
@@ -555,6 +588,14 @@ def _():
         ("2026-08-12", "AAPL", "sell", 40, 250.00),
     ]
     year_trades
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I would use a dictionary to store each stock and its purchases, including the number of shares and the purchase price. When selling, I would sell the oldest shares first, calculate profit, and update the remaining shares.
+    """)
     return
 
 
