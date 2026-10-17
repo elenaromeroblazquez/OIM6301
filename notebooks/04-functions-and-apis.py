@@ -394,6 +394,40 @@ def _(mo):
     return
 
 
+@app.cell
+def _(requests):
+    def get_temperature(town):
+        place_reply = requests.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": town, "count": 1},
+            timeout=10,
+        )
+
+        place = place_reply.json()["results"][0]
+
+        weather_reply = requests.get(
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": place["latitude"],
+                "longitude": place["longitude"],
+                "current": "temperature_2m",
+                "temperature_unit": "fahrenheit",
+            },
+            timeout=10,
+        )
+
+        return weather_reply.json()["current"]["temperature_2m"]
+
+
+    return (get_temperature,)
+
+
+@app.cell
+def _(get_temperature):
+    get_temperature("Wellesley")
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -403,6 +437,27 @@ def _(mo):
 
     *Check yourself: Dover, Wellesley, Cohasset, Needham, Westwood.*
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    top_five_reply = requests.get(
+        "https://oim.zhili.dev/ma/towns",
+        params={
+            "county": "Norfolk",
+            "sort": "income",
+            "order": "desc",
+            "per_page": 5
+        },
+        timeout=10
+    )
+
+    top_five = top_five_reply.json()["items"]
+
+    for town in top_five:
+        print(town["name"])
+
     return
 
 
@@ -419,6 +474,48 @@ def _(mo):
 
     **Going further.** Write `town_history(name)`, which takes a town's name, makes both requests, and returns the history.
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    wellesley_reply = requests.get(
+        "https://oim.zhili.dev/ma/towns",
+        params={"name": "Wellesley"},
+        timeout=10
+    )
+
+    wellesley = wellesley_reply.json()["items"][0]
+
+    wellesley_code = wellesley["dor_code"]
+
+    print(wellesley_code)
+
+    return (wellesley_code,)
+
+
+@app.cell
+def _(requests, wellesley_code):
+    history_reply = requests.get(
+        f"https://oim.zhili.dev/ma/towns/{wellesley_code}/history",
+        timeout=10
+    )
+
+    history = history_reply.json()
+    history
+
+    return
+
+
+@app.cell
+def _():
+    average_value = 2020758
+    tax_rate = 10.17
+
+    tax_bill = average_value * tax_rate / 1000
+
+    print(round(tax_bill, 2))
+
     return
 
 
