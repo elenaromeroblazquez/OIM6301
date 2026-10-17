@@ -163,7 +163,7 @@ def _(mo):
 
     **D · I prefer a list of dictionaries because each value has a name, making the code easier to read and understand.**
 
-    **G ·**
+    **G · The first result is in Florida. Using [0] would select the wrong location because we are looking for Babson College in Massachusetts.**
     """)
     return
 
@@ -759,11 +759,39 @@ def _(mo):
     return
 
 
+@app.cell
+def _(babson_weather):
+    wind_speed = babson_weather["current"]["wind_speed_10m"]
+
+    wind_unit = babson_weather["current_units"]["wind_speed_10m"]
+
+    print(f"The wind speed at Babson is {wind_speed} {wind_unit}.")
+
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     **F · Another town.** Search for `Wellesley` the way the misspelled search did, with the correct spelling. Take the first place out of `results`, then its `latitude`, `longitude` and `admin1`. *Check yourself: latitude 42.29649, in Massachusetts.*
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    wellesley_reply = requests.get(
+        "https://geocoding-api.open-meteo.com/v1/search?name=Wellesley&count=1",
+        timeout=10
+    )
+
+    wellesley_data = wellesley_reply.json()
+    wellesley = wellesley_data["results"][0]
+
+    print(wellesley["latitude"])
+    print(wellesley["longitude"])
+    print(wellesley["admin1"])
+
     return
 
 
@@ -774,6 +802,30 @@ def _(mo):
 
     **Going further.** Use F's coordinates to ask for Wellesley's current temperature. Build the address with an f-string, so that changing the town changes the forecast.
     """)
+    return
+
+
+@app.cell
+def _(requests):
+    babson_park_reply = requests.get(
+        "https://geocoding-api.open-meteo.com/v1/search?name=Babson%20Park&count=5",
+        timeout=10
+    )
+
+    babson_park_data = babson_park_reply.json()
+
+    babson_park_data["results"]
+
+    return (babson_park_data,)
+
+
+@app.cell
+def _(babson_park_data):
+    first_place = babson_park_data["results"][0]
+
+    print(first_place["name"])
+    print(first_place["admin1"])
+
     return
 
 
