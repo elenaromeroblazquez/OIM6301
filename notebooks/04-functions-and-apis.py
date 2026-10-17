@@ -600,6 +600,35 @@ def _(mo):
     return
 
 
+@app.cell
+def _(get_page):
+    def get_all_towns():
+        first_page = get_page(1)
+
+        towns = first_page["items"]
+        pages = first_page["pagination"]["pages"]
+
+        for page in range(2, pages + 1):
+            next_page = get_page(page)
+            towns.extend(next_page["items"])
+
+        return towns
+
+
+    return (get_all_towns,)
+
+
+@app.cell
+def _(get_all_towns):
+    all_towns = get_all_towns()
+
+    print(len(all_towns))
+    print(all_towns[0]["name"])
+    print(all_towns[-1]["name"])
+
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
