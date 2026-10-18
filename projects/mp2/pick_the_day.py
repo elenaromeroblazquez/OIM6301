@@ -314,6 +314,155 @@ def _(best_day, place):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    #6. 🔢 HOW I KNOW THESE NUMBERS ARE RIGHT
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I will check the results in 2 ways:
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *First one:*
+    """)
+    return
+
+
+@app.cell
+def _(latitude, longitude, requests, weather):
+    check_url = "https://api.open-meteo.com/v1/forecast"
+
+    check_params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "daily": "temperature_2m_max",
+        "timezone": "America/New_York",
+        "forecast_days": 7
+    }
+
+    check_response = requests.get(check_url, params=check_params)
+    check_response.raise_for_status()
+
+    api_days = len(check_response.json()["daily"]["time"])
+    table_days = len(weather)
+
+    print(f"Days returned by the API: {api_days}")
+    print(f"Days in our table: {table_days}")
+    print(f"Do they match? {api_days == table_days}")
+
+    return (check_url,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I compared the number of days returned by the API with the number of days in our table. Both have 7 days, so no records are missing.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *Second one:*
+    """)
+    return
+
+
+@app.cell
+def _(check_url, latitude, longitude, requests, weather):
+    value_check_params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "daily": "temperature_2m_max",
+        "temperature_unit": "fahrenheit",
+        "timezone": "America/New_York",
+        "forecast_days": 7
+    }
+
+    value_check_response = requests.get(check_url, params=value_check_params)
+    value_check_response.raise_for_status()
+
+    api_temperature = value_check_response.json()["daily"]["temperature_2m_max"][0]
+    our_temperature = weather[0]["high_f"]
+
+    print(f"Temperature from API: {api_temperature}")
+    print(f"Temperature in our table: {our_temperature}")
+    print(f"Do they match? {api_temperature == our_temperature}")
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I compared the first day's temperature in our table with the value from the API. Both values match, confirming that the temperature was recorded correctly.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #7. 🤖 WORKING WITH THE AGENT
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I used Marimo Agent to help me write and understand the code throughout the project.
+
+    One thing I improved was how the program handles days that do not meet the weather conditions.
+    At first, the code only said that no day met the requirements. I changed it so that the program also recommends the day that breaks the fewest rules.
+
+    I made this change because the assignment requires the tool to recommend an alternative day.
+
+    This improvement can be seen in Section 4.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #8. ⏪ READING IT BACK
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Function 1: get_coordinates()**
+
+    This function takes the town and state as inputs and uses the Geocoding API to find its location. It returns the latitude and longitude.
+
+    One line I needed to understand was data.get("results", []). I learned that it gets the list of locations from the API and returns an empty list if no results are found.
+
+    **Function 2: get_weather()**
+
+    This function takes the latitude and longitude and uses the Forecast API to get the weather for the next seven days. It returns a list of dictionaries with the date, temperatures, chance of rain, and wind speed.
+
+    One line I needed to understand was for _i in range(len(daily["time"])). I learned that it loops through the days so we can organize the weather information for each day into one dictionary.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **MY PREDICTION**
+
+    I will change the maximum rain chance from 30% to 5%. I expect fewer days to meet the conditions because the rain limit will be stricter. I also expect October 19 to remain the best day if the forecast stays the same, since it has only a 1% chance of rain.
     """)
     return
 
