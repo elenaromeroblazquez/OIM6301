@@ -70,7 +70,7 @@ def _():
     lowest_high_f = 55
     highest_high_f = 80
 
-    max_rain_chance = 30
+    max_rain_chance = 5
     max_wind_mph = 15
 
     return (
@@ -202,6 +202,32 @@ def _(get_weather, latitude, longitude):
 def _(mo):
     mo.md(r"""
     This function uses Wellesley's coordinates to get the weather forecast for the next 7 days and organizes the data into a list of daily records.
+    """)
+    return
+
+
+@app.cell
+def _(weather):
+    import json
+    from pathlib import Path
+
+    _data_folder = Path("projects/mp2/data")
+    _data_folder.mkdir(parents=True, exist_ok=True)
+
+    _data_file = _data_folder / "weather_data.json"
+
+    with open(_data_file, "w", encoding="utf-8") as _file:
+        json.dump(weather, _file, indent=2)
+
+    print(f"Saved {len(weather)} days of weather data.")
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    *I saved the weather data from the API in a JSON file, so I have a copy of the information.*
     """)
     return
 
@@ -460,9 +486,31 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    **MY PREDICTION**
+    ##**🧠 MY PREDICTION**
 
     I will change the maximum rain chance from 30% to 5%. I expect fewer days to meet the conditions because the rain limit will be stricter. I also expect October 19 to remain the best day if the forecast stays the same, since it has only a 1% chance of rain.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ###**What happened**
+
+    After changing the maximum rain chance from 30% to 5%, the number of suitable days decreased from 5 to 2.
+
+    October 19 remained the best day because it had the lowest chance of rain.
+
+    This matched my prediction and showed that the tool responds correctly when the inputs change.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+ 
     """)
     return
 
