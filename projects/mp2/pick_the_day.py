@@ -348,7 +348,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    I will check the results in 2 ways:
+    **I will check the results in 2 ways:**
     """)
     return
 
@@ -356,7 +356,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    *First one:*
+    ####First one
     """)
     return
 
@@ -397,7 +397,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    *Second one:*
+    ####Second one:
     """)
     return
 
@@ -511,6 +511,88 @@ def _(mo):
 def _(mo):
     mo.md(r"""
  
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #9. 🏅 GOING FURTHER
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I wanted to add a weather score from 0 to 10 for each day. The score will be based on temperature, rain probability, and wind speed. This will make it easier to compare the weather conditions, even when some days do not meet all the requirements.
+    """)
+    return
+
+
+@app.cell
+def _(highest_high_f, lowest_high_f, max_rain_chance, max_wind_mph, weather):
+    weather_scores = []
+
+    for _day in weather:
+        _score = 0
+
+        if lowest_high_f <= _day["high_f"] <= highest_high_f:
+            _score += 4
+
+        if _day["rain_chance"] <= max_rain_chance:
+            _score += 3
+
+        if _day["wind_mph"] <= max_wind_mph:
+            _score += 3
+
+        weather_scores.append({
+            "date": _day["date"],
+            "score": _score
+        })
+
+    print(f"{'Date':<12} {'Score (/10)':>12}")
+    print("-" * 25)
+
+    for _day in weather_scores:
+        print(f"{_day['date']:<12} {_day['score']:>12}")
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I added a scoring system from 0 to 10 based on temperature, rain, and wind conditions. Then, it is easy to compare the weather across the seven 7, even when some days do not meet all the requirements.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ###**🔎 What I Found**
+
+    October 19 and 20 received the highest score of 10/10 because they meet all the weather conditions. However, October 19 is still the best option because it has a lower chance of rain (1% compared to 2%).
+
+    This scoring system makes it easier to compare all 7 days.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #10. ⏰ TIME SPENT
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    About 3 hours.
     """)
     return
 
