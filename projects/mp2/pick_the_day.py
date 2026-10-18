@@ -14,7 +14,7 @@ def _():
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    #1. THE QUESTION
+    #1. ❓ THE QUESTION
     This tool is designed to help a student club at Babson College choose the best day for an outdoor event. It compares the weather forecast for the next seven days, considering temperature, chance of rain, and wind speed. Based on these conditions, the tool recommends the best day to organize the event.
     """)
     return
@@ -23,7 +23,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    #2. MY PLAN BEFORE AI
+    #2. 💡 MY PLAN BEFORE AI
 
     **My plan:**
 
@@ -50,6 +50,270 @@ def _(mo):
     **How I will check the data:**
 
     I will make sure the forecast includes all 7 days by comparing the number of dates returned by the API with the number of rows in my table. Both numbers should be 7. I will also compare the weather values for one day with the original API response in my browser to check that the information is correct.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # 3. 🌡️☔🌤️ INPUTS
+    """)
+    return
+
+
+@app.cell
+def _():
+    place = "Wellesley"
+    state = "Massachusetts"
+
+    lowest_high_f = 55
+    highest_high_f = 80
+
+    max_rain_chance = 30
+    max_wind_mph = 15
+
+    return (
+        highest_high_f,
+        lowest_high_f,
+        max_rain_chance,
+        max_wind_mph,
+        place,
+        state,
+    )
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #4. 💻 THE WORK
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Function get_coordinates():** function that uses the Geocoding API to find the latitude and longitude of Wellesley, MA, so we can get its weather forecast.
+    """)
+    return
+
+
+@app.cell
+def _():
+    import requests
+
+    def get_coordinates(place, state):
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+
+        params = {
+            "name": place,
+            "count": 100,
+            "language": "en",
+            "format": "json"
+        }
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        for _location in data.get("results", []):
+            if _location["admin1"] == state and _location["country_code"] == "US":
+                return _location["latitude"], _location["longitude"]
+
+        raise ValueError("Town not found in the selected state")
+
+
+    return get_coordinates, requests
+
+
+@app.cell
+def _(get_coordinates, place, state):
+    latitude, longitude = get_coordinates(place, state)
+
+    print(latitude, longitude)
+
+    return latitude, longitude
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    It correctly returns the latitude (42.29649) and longitude (-71.29256) of Wellesley, MA.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    **Function get_weather():** I want get_weather() to use these coordinates to request the weather forecast for the next 7 days from the Forecast API.
+    """)
+    return
+
+
+@app.cell
+def _(requests):
+    def get_weather(latitude, longitude):
+        url = "https://api.open-meteo.com/v1/forecast"
+
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max",
+            "temperature_unit": "fahrenheit",
+            "wind_speed_unit": "mph",
+            "timezone": "America/New_York",
+            "forecast_days": 7
+        }
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        daily = response.json()["daily"]
+
+        weather = []
+
+        for _i in range(len(daily["time"])):
+            weather.append({
+                "date": daily["time"][_i],
+                "high_f": daily["temperature_2m_max"][_i],
+                "low_f": daily["temperature_2m_min"][_i],
+                "rain_chance": daily["precipitation_probability_max"][_i],
+                "wind_mph": daily["wind_speed_10m_max"][_i]
+            })
+
+        return weather
+
+
+    return (get_weather,)
+
+
+@app.cell
+def _(get_weather, latitude, longitude):
+    weather = get_weather(latitude, longitude)
+
+    for _day in weather:
+        print(_day)
+
+    return (weather,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This function uses Wellesley's coordinates to get the weather forecast for the next 7 days and organizes the data into a list of daily records.
+    """)
+    return
+
+
+@app.cell
+def _(highest_high_f, lowest_high_f, max_rain_chance, max_wind_mph, weather):
+    for _day in weather:
+        _good_temp = lowest_high_f <= _day["high_f"] <= highest_high_f
+        _good_rain = _day["rain_chance"] <= max_rain_chance
+        _good_wind = _day["wind_mph"] <= max_wind_mph
+
+        if _good_temp and _good_rain and _good_wind:
+            _day["passes"] = "Yes"
+        else:
+            _day["passes"] = "No"
+
+        print(_day["date"], _day["passes"])
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    I checked the weather conditions for each of the 7 days. The program found that 5 days meet all the requirements for the outdoor event, while 2 days do not.
+    """)
+    return
+
+
+@app.cell
+def _(highest_high_f, lowest_high_f, max_rain_chance, max_wind_mph, weather):
+    best_day = None
+
+    for _day in weather:
+        if _day["passes"] == "Yes":
+            if best_day is None:
+                best_day = _day
+            elif _day["rain_chance"] < best_day["rain_chance"]:
+                best_day = _day
+            elif _day["rain_chance"] == best_day["rain_chance"] and _day["wind_mph"] < best_day["wind_mph"]:
+                best_day = _day
+
+    if best_day is not None:
+        print(f"The best day is {best_day['date']}, with {best_day['rain_chance']}% chance of rain and {best_day['wind_mph']} mph wind.")
+    else:
+        _backup_day = None
+        _fewest_broken = 4
+
+        for _day in weather:
+            _broken_rules = 0
+
+            if not (lowest_high_f <= _day["high_f"] <= highest_high_f):
+                _broken_rules += 1
+
+            if _day["rain_chance"] > max_rain_chance:
+                _broken_rules += 1
+
+            if _day["wind_mph"] > max_wind_mph:
+                _broken_rules += 1
+
+            if _broken_rules < _fewest_broken:
+                _fewest_broken = _broken_rules
+                _backup_day = _day
+
+        best_day = _backup_day
+
+        print(f"No day meets all conditions. The best alternative is {_backup_day['date']}, which breaks {_fewest_broken} rules.")
+
+
+    return (best_day,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The program recommends October 19. I also added an alternative in case no day meets all the conditions, choosing the day that breaks the fewest rules.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    #5. ✏️ THE ANSWER
+    """)
+    return
+
+
+@app.cell
+def _(weather):
+    print(f"{'Date':<12} {'High (F)':>9} {'Low (F)':>9} {'Rain (%)':>9} {'Wind (mph)':>11} {'Passes':>8}")
+    print("-" * 65)
+
+    for _day in weather:
+        print(f"{_day['date']:<12} {_day['high_f']:>9.1f} {_day['low_f']:>9.1f} {_day['rain_chance']:>9} {_day['wind_mph']:>11.1f} {_day['passes']:>8}")
+
+    return
+
+
+@app.cell
+def _(best_day, place):
+    if best_day["passes"] == "Yes":
+        print(f"The best day for an outdoor event in {place} is {best_day['date']}, with a high of {best_day['high_f']}°F, {best_day['rain_chance']}% chance of rain, and {best_day['wind_mph']} mph wind.")
+    else:
+        print(f"No day meets all the conditions in {place}. The best alternative is {best_day['date']}, with a high of {best_day['high_f']}°F, {best_day['rain_chance']}% chance of rain, and {best_day['wind_mph']} mph wind.")
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     """)
     return
 
