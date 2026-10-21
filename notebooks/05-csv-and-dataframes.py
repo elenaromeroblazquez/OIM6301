@@ -343,7 +343,7 @@ def _(mo):
 @app.cell
 def _(pl, town_table):
     (
-        town_table.filter(pl.col("average_single_family_value_dollars") >= 1_000_000)
+        town_table.filter(pl.col("average_single_family_value_dollars") >= 2_000_000)
         .group_by("county")
         .agg(pl.len().alias("towns"))
         .sort("towns", descending=True)
@@ -401,6 +401,102 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ma_counties, pl, town_table):
+    county_counts_polars = (
+        town_table
+        .group_by("county")
+        .agg(pl.len().alias("towns"))
+        .sort("county")
+    )
+
+    county_counts_server = (
+        pl.DataFrame(ma_counties)
+        .select(
+            pl.col("name").alias("county"),
+            pl.col("towns").alias("server_towns")
+        )
+    )
+
+    county_comparison = (
+        county_counts_polars
+        .join(county_counts_server, on="county")
+        .with_columns(
+            (pl.col("towns") == pl.col("server_towns")).alias("match")
+        )
+        .sort("county")
+    )
+
+    county_comparison
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The code counts the towns in each county and compares the results with the API data. All 14 counties match, confirming that our CSV contains the correct number of towns.
+    """)
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    highest_bills = (
+        town_table
+        .filter(pl.col("population") > 50000)
+        .sort("average_single_family_bill_dollars", descending=True)
+        .select(
+            "name",
+            "county",
+            "population",
+            "average_single_family_bill_dollars"
+        )
+        .head(5)
+    )
+
+    highest_bills
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The code selects towns with more than 50,000 people, sorts them by average property tax bill from highest to lowest, and shows the top 5.
+    """)
+    return
+
+
+@app.cell
+def _(pl, town_table):
+    income_by_county = (
+        town_table
+        .filter(pl.col("population") > 20000)
+        .group_by("county")
+        .agg(
+            pl.col("income_per_capita_dollars")
+            .mean()
+            .round(0)
+            .alias("average_income"),
+            pl.len().alias("towns")
+        )
+        .sort("average_income", descending=True)
+    )
+
+    income_by_county
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The code selects towns with more than 20,000 people, calculates the average town-level income per capita for each county, and ranks the counties from highest to lowest.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -414,12 +510,12 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _(mo, town_table):
     towns_over_threshold = mo.sql(
         f"""
         SELECT county, COUNT(*) AS towns
         FROM town_table
-        WHERE average_single_family_value_dollars >= 1000000
+        WHERE average_single_family_value_dollars >= 2000000
         GROUP BY county
         ORDER BY towns DESC
         """
@@ -443,6 +539,14 @@ def _(mo):
     In the SQL cell, `1000000` is the bar a town's average home value has to reach. Before you change it to `2000000`, predict in a markdown cell under this question: which counties' counts can go down, and can any go up? Then make the same change in the polars cell that counts million-dollar towns, and run both. *Check yourself: both give Dukes, Middlesex and Norfolk 2 each and Nantucket 1, which is 7 towns.*
 
     **Going further.** Write a SQL query of your own on `town_table`, and check its answer in polars.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Prediction: If we increase the minimum home value to $2 million, the number of qualifying towns can only decrease or stay the same. It cannot increase because fewer towns will meet the higher requirement.
     """)
     return
 
@@ -496,6 +600,60 @@ def _(mo):
     *Check yourself: somebody who has not seen this notebook can say what each axis measures.*
 
     **Going further.** Color the bars or dots by a column with `color=`, and explain what the colors add.
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ###MY QUESTION:
+    Do towns with higher income per capita also have higher average home values?
+    """)
+    return
+
+
+@app.cell
+def _(alt, mo, town_table):
+    income_home_chart = mo.ui.altair_chart(
+        town_table.plot.point(
+            x=alt.X(
+                "income_per_capita_dollars",
+                title="Income per Capita ($)"
+            ),
+            y=alt.Y(
+                "average_single_family_value_dollars",
+                title="Average Home Value ($)"
+            ),
+            color=alt.Color(
+                "county:N",
+                title="County"
+            ),
+            tooltip=[
+                "name:N",
+                "county:N",
+                "income_per_capita_dollars:Q",
+                "average_single_family_value_dollars:Q"
+            ]
+        ).properties(
+            title="Income per Capita vs. Average Home Value"
+        )
+    )
+
+    income_home_chart
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    This scatter plot chart explores the relationship between income per capita and average home values in Massachusetts towns. Each point represents a town.
+    The colors represent different counties, making it easier to compare locations and identify possible patterns.
+    - x axis: income per capita
+    - y axis: average home value
+    - each dot: one town
+    - colors: different countries
     """)
     return
 
