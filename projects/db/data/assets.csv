@@ -1,0 +1,13 @@
+asset_id,asset_name,asset_type,sector
+1,Apple,stock,Technology
+2,Microsoft,stock,Technology
+3,NVIDIA,stock,Technology
+4,Amazon,stock,Consumer Discretionary
+5,Alphabet,stock,Communication Services
+6,Tesla,stock,Consumer Discretionary
+7,Meta,stock,Communication Services
+8,Nova Analytics,stock,Technology
+9,S&P 500 ETF,ETF,Diversified
+10,Nasdaq 100 ETF,ETF,Technology
+11,Bitcoin,crypto,
+12,Ethereum,crypto,

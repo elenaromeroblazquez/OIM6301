@@ -183,3 +183,5 @@ cython_debug/
 __marimo__/
 __marimo__/
 
+# DuckDB database files
+*.duckdb*
