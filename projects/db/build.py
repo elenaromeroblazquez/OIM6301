@@ -17,8 +17,10 @@ def _():
     database = mo.notebook_dir() / "database.duckdb"
 
     def ask(sql):
+        import polars as pl
         with duckdb.connect(database, read_only=True) as _con:
-            return _con.sql(sql).pl()
+            return pl.DataFrame(_con.sql(sql))
+
 
 
     return ask, database, duckdb, mo
@@ -231,16 +233,16 @@ def _(
                 p.portfolio_name,
                 t.trade_date,
                 COUNT(*) AS total_trades,
-                SUM(CASE
+                ROUND(SUM(CASE
                     WHEN t.trade_type = 'buy'
                     THEN t.quantity * t.price_per_unit + t.fee
                     ELSE 0
-                END) AS money_spent,
-                SUM(CASE
+                END), 2) AS money_spent,
+                ROUND(SUM(CASE
                     WHEN t.trade_type = 'sell'
                     THEN t.quantity * t.price_per_unit - t.fee
                     ELSE 0
-                END) AS money_received
+                END), 2) AS money_received
             FROM portfolios p
             JOIN trades t
                 ON p.portfolio_id = t.portfolio_id
