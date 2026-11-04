@@ -30,7 +30,7 @@ def _():
 def _(mo):
     mo.md(r"""
     # **PART A** (Database Project)
-    ###**BabsonAI Labs**
+    ###**B. Babson Investment Club**
     """)
     return
 
