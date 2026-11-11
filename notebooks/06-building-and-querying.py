@@ -238,14 +238,12 @@ def _(database, duckdb):
                 ('Wellesley', 2025, 19792),
                 ('Wellesley', 2026, 20551)
         """)
-
     return
 
 
 @app.cell
 def _(ask):
     ask("SELECT * FROM town_bills")
-
     return
 
 
@@ -260,7 +258,6 @@ def _(database, duckdb):
         print("Accepted")
     except duckdb.ConstraintException as e:
         print("Rejected:", str(e).splitlines()[0])
-
     return
 
 
@@ -275,7 +272,6 @@ def _(database, duckdb):
         print("Accepted")
     except duckdb.ConstraintException as e:
         print("Rejected:", str(e).splitlines()[0])
-
     return
 
 
@@ -326,7 +322,6 @@ def _(database, duckdb):
         print("Accepted")
     except duckdb.ConstraintException as e:
         print("Rejected:", str(e).splitlines()[0])
-
     return
 
 
@@ -341,7 +336,6 @@ def _(database, duckdb):
         print("Accepted")
     except duckdb.ConstraintException as e:
         print("Rejected:", str(e).splitlines()[0])
-
     return
 
 
@@ -356,7 +350,6 @@ def _(database, duckdb):
         print("Accepted")
     except duckdb.ConstraintException as e:
         print("Rejected:", str(e).splitlines()[0])
-
     return
 
 
@@ -466,6 +459,19 @@ def _(ask):
         GROUP BY county
         HAVING count(*) > 5
         ORDER BY towns DESC
+    """)
+    return
+
+
+@app.cell
+def _(ask):
+    ask("""
+    SELECT county, count (*) AS town_count, sum(population) AS total_pop, round (avg(population)) AS avg_pop, max (population) AS max_pop
+    FROM towns 
+    WHERE average_single_family_bill_dollars > 10000
+    GROUP BY county 
+    HAVING count(*) > 5
+    ORDER BY town DESC
     """)
     return
 
