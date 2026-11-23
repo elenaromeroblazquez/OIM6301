@@ -26,6 +26,14 @@ def _():
     return as_of, ask, mo
 
 
+@app.cell
+def _(ask):
+    ask("""
+    SHOW TABLES
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -757,7 +765,6 @@ def _(fee_summary):
     ax.set_ylabel("Total Trading Fees ($)")
 
     fig
-
     return
 
 

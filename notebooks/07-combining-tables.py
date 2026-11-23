@@ -216,6 +216,49 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask, towns_database):
+    ask(towns_database, """
+        SELECT COUNT(*) AS total_rows
+        FROM towns t
+        JOIN counties c
+            ON t.county = c.name
+    """)
+
+    return
+
+
+@app.cell
+def _(ask, towns_database):
+    ask(towns_database, """
+        SELECT
+            t.name AS town,
+            t.county,
+            t.population AS town_population,
+            c.population AS county_population,
+            ROUND(
+                100.0 * t.population / c.population, 1
+            ) AS population_share
+        FROM towns t
+        JOIN counties c
+            ON t.county = c.name
+        ORDER BY population_share DESC
+        LIMIT 5
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The JOIN returns 351 rows, which is the same number as the towns in the database. This happens because every town belongs to exactly one county, so each town appears once in the result.
+    Nantucket has the highest population share at 100.0%, followed by Boston (81.9%), Pittsfield (33.5%), Springfield (33.4%), and Oak Bluffs (25.7%).
+    Nantucket has a population share of exactly 100% because it is the only town in Nantucket County. Therefore, the town's population is equal to the county's population.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -276,6 +319,33 @@ def _(mo):
     **Going further.** List the employees with the number of territories each covers, and check that the counts add up to the rows of `employee_territories`. Then find the same four territories with `WHERE NOT EXISTS (...)`.
     """)
     return
+
+
+@app.cell
+def _(ask, northwind_database):
+    ask(northwind_database, """
+        SELECT
+            t.TerritoryID,
+            t.TerritoryDescription
+        FROM territories t
+        LEFT JOIN employee_territories et
+            ON t.TerritoryID = et.TerritoryID
+        WHERE et.TerritoryID IS NULL
+        ORDER BY t.TerritoryDescription
+    """)
+
+    return
+
+
+app._unparsable_cell(
+    r"""
+    These territories are not assigned to any employee.
+    I used a LEFT JOIN to keep all territories and IS NULL to find those without a matching record in employee_territories.
+    This helps the manager identify territories that currently have no employee coverage.
+
+    """,
+    name="_"
+)
 
 
 @app.cell(hide_code=True)
@@ -379,6 +449,31 @@ def _(mo):
     return
 
 
+@app.cell
+def _(ask, northwind_database):
+    ask(northwind_database, """
+        SELECT
+            ShipCountry,
+            COUNT(*) AS total_orders,
+            ROUND(SUM(Freight), 2) AS total_freight
+        FROM orders
+        GROUP BY ShipCountry
+        ORDER BY total_freight DESC
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    USA has the highest total freight, with across 2,328 orders.
+    I calculated freight directly from the orders table, so each order's freight is counted only once.
+    This helps the manager identify which countries have the highest shipping costs.
+    """)
+    return
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
@@ -395,6 +490,57 @@ def _(mo):
     *Check yourself: Beverages first, with about 13,375,939, and all eight, added before rounding, give 63,856,337.63.*
 
     **Going further.** Compute revenue by category for each year, and find the category that grew the most.
+    """)
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+    ask(northwind_database, """
+        SELECT
+            c.CategoryName,
+            ROUND(
+                SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)),
+                2
+            ) AS total_revenue
+        FROM orders o
+        JOIN order_details od
+            ON o.OrderID = od.OrderID
+        JOIN products p
+            ON od.ProductID = p.ProductID
+        JOIN categories c
+            ON p.CategoryID = c.CategoryID
+        WHERE o.ShipCountry = 'USA'
+        GROUP BY c.CategoryName
+        ORDER BY total_revenue DESC
+    """)
+
+    return
+
+
+@app.cell
+def _(ask, northwind_database):
+    ask(northwind_database, """
+        SELECT
+            ROUND(
+                SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)),
+                2
+            ) AS usa_total_revenue
+        FROM orders o
+        JOIN order_details od
+            ON o.OrderID = od.OrderID
+        WHERE o.ShipCountry = 'USA'
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    Beverages generated the highest revenue from orders shipped to the USA, with $13,375,938.98.
+    The query returned 8 product categories. Their combined revenue was $63,856,337.63, which matches the total calculated directly from orders and order_details.
+    This confirms that the joins did not duplicate or lose revenue.
     """)
     return
 
@@ -444,6 +590,20 @@ def _(mo, os, pl):
             return pl.DataFrame(_cursor.fetchall(), schema=_columns, orient="row")
 
     ask_server("SELECT TOP 5 SalesOrderID, OrderDate, Freight FROM Sales.SalesOrderHeader ORDER BY SalesOrderID")
+    return (ask_server,)
+
+
+@app.cell
+def _(ask_server):
+    ask_server("""
+        SELECT TOP 5
+            SalesOrderID,
+            OrderDate,
+            Freight
+        FROM Sales.SalesOrderHeader
+        ORDER BY SalesOrderID
+    """)
+
     return
 
 
@@ -467,6 +627,103 @@ def _(mo):
     3. Find the customers in `Sales.Customer` who never placed an order, and the products in `Production.Product` that never sold. *Check yourself: 701 customers and 238 products.*
 
     **Going further.** Answer one question of your own about AdventureWorks that needs three tables, and check it against a total you can get from one of them.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+    ask_server("""
+        SELECT
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader) AS total_orders,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderDetail) AS total_order_lines,
+
+            (SELECT COUNT(*)
+             FROM Sales.SalesOrderHeader h
+             JOIN Sales.SalesOrderDetail d
+                 ON h.SalesOrderID = d.SalesOrderID
+            ) AS joined_rows
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The SalesOrderHeader table contains 31,465 orders, while SalesOrderDetail contains 121,317 order lines.
+    After joining both tables, the result contains 121,317 rows because one order can have multiple order lines. Each row in the JOIN represents one order line, not one unique order.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+    ask_server("""
+        SELECT
+            (
+                SELECT ROUND(SUM(Freight), 2)
+                FROM Sales.SalesOrderHeader
+            ) AS freight_direct,
+
+            (
+                SELECT ROUND(SUM(Freight), 2)
+                FROM (
+                    SELECT
+                        h.SalesOrderID,
+                        MAX(h.Freight) AS Freight
+                    FROM Sales.SalesOrderHeader h
+                    JOIN Sales.SalesOrderDetail d
+                        ON h.SalesOrderID = d.SalesOrderID
+                    GROUP BY h.SalesOrderID
+                ) AS unique_orders
+            ) AS freight_after_join
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The total freight is $3,183,430.25 using both methods.
+    After joining SalesOrderHeader with SalesOrderDetail, I grouped the results by SalesOrderID to count each order's freight only once.
+    This is important because joining the tables creates multiple rows for orders with several products. Without grouping, the freight would be counted more than once.
+    """)
+    return
+
+
+@app.cell
+def _(ask_server):
+    ask_server("""
+        SELECT
+            (SELECT COUNT(*)
+             FROM Sales.Customer c
+             LEFT JOIN Sales.SalesOrderHeader h
+                 ON c.CustomerID = h.CustomerID
+             WHERE h.SalesOrderID IS NULL
+            ) AS customers_without_orders,
+
+            (SELECT COUNT(*)
+             FROM Production.Product p
+             LEFT JOIN Sales.SalesOrderDetail d
+                 ON p.ProductID = d.ProductID
+             WHERE d.ProductID IS NULL
+            ) AS products_never_sold
+    """)
+
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    The database contains 701 customers who have never placed an order and 238 products that have never been sold.
+    I used LEFT JOIN and IS NULL to identify customers and products without matching sales records.
+    This information could help the company identify inactive customers and products with no sales activity.
     """)
     return
 
